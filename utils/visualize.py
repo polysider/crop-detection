@@ -145,7 +145,7 @@ class TestVisualizer(Visualizer):
                 self.axes.flat[i].set_yticks([])
 
         # Draw the plot
-        plt.show(block=True)
+        plt.show(block=False)
         plt.draw()
         plt.pause(0.5)
 

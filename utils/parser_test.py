@@ -41,13 +41,13 @@ def parse_args():
 
     parser.add_argument(
         '--cropped_data_ratio',
-        default=0.9,
+        default=0.5,
         type=float,
         help='Proportion of the data that is left uncropped as a class with a label 0')
 
     parser.add_argument(
         '--dataset_size',
-        default=10,
+        default=None,
         type=int,
         help='Total amount of data used for testing')
 
@@ -170,7 +170,7 @@ from datetime import datetime
 def post_process_args(args):
 
     if args.log_same_folder and args.model_folder:
-        args.result_folder = args.model_folder
+        args.result_folder = os.path.join(args.model_folder, os.pardir)
 
     if args.data_folder and args.dataset:
         args.data_path = os.path.join(args.root_path, args.data_folder, args.dataset)

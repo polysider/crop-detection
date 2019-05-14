@@ -97,8 +97,6 @@ class CroppedStanfordOnlineProducts(ImageFolder, CIFAR10):
         return img, target
 
     def _prepare_sample(self, index):
-        # TODO: rewrite this so that a cropped image is getting a 1 label, and the non-cropped one is labeled as 0
-        # TODO: the cropped image needs to be transformed via a self.crop_tansform
 
         # cropped image is getting a 1 label, and the non-cropped one is labeled as 0
         if self.crop_transform is not None:

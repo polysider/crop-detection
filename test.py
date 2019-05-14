@@ -3,7 +3,7 @@ import torch
 
 import random
 import numpy as np
-from  dataset import data_loading
+from dataset import data_loading
 
 from utils.parser_test import parse_args
 from utils.model_loading import get_model
@@ -50,6 +50,21 @@ def main(args):
         os.path.join(args.log_path, 'test.log'),
         ['batch', 'loss', 'acc'])
 
+    revision_logger = Logger(
+        os.path.join(args.log_path, 'test_config.log'),
+        ['dataset', 'n_classes', 'model', 'model_depth', 'test_batch_size', 'crop_scale', 'cropped_data_ratio', 'dataset_size', 'shuffle'])
+    revision_logger.log({
+        'dataset': args.dataset,
+        'n_classes': args.n_classes,
+        'model': args.model,
+        'model_depth': args.model_depth,
+        'test_batch_size': args.batch_size,
+        'crop_scale': args.crop_scale,
+        'cropped_data_ratio': args.cropped_data_ratio,
+        'dataset_size': args.dataset_size,
+        'shuffle': args.shuffle
+    })
+
     # load the trained model weights
     print('loading checkpoint {}'.format(args.model_path))
     checkpoint = torch.load(args.model_path)
@@ -93,7 +108,7 @@ def main(args):
                 loss=losses,
                 acc=accuracies))
 
-
+    print('Test log written to {}'.format(test_logger.log_file))
 
 
 
