@@ -48,7 +48,7 @@ class Trainer:
             self.model.load_state_dict(checkpoint['state_dict'])
             self.optimizer.load_state_dict(checkpoint['optimizer'])
 
-        for epoch in range(self.start_epoch, self.epochs + 1):
+        for epoch in range(self.start_epoch, self.epochs + self.start_epoch):
             result = self._train_epoch(epoch)
 
         return result

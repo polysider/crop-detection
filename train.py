@@ -5,7 +5,7 @@ from torch import optim
 from torch.optim import lr_scheduler
 import random
 import numpy as np
-from dataset.data_loading import MNISTLoader, CroppedMNISTLoader, CroppedSOPLoader
+from dataset.data_loading import MNISTLoader, CroppedMNISTLoader, CroppedSOPLoader, ShopeeDataLoader
 
 from models import losses
 
@@ -28,7 +28,7 @@ def main(args):
 
     if args.dataset == 'MNIST':
         args.sample_size = 28
-    elif args.dataset == 'SOP':
+    elif args.dataset == 'SOP' or 'Shopee':
         if args.model == 'resnet':
             args.sample_size = 224
         else:
@@ -43,6 +43,10 @@ def main(args):
 
     elif args.dataset == 'SOP':
         train_data_loader = CroppedSOPLoader(args, crop_transform=crop_transform,
+                                               spatial_transform=spatial_transform_train, training=True)
+
+    elif args.dataset == 'Shopee':
+        train_data_loader = ShopeeDataLoader(args, crop_transform=crop_transform,
                                                spatial_transform=spatial_transform_train, training=True)
 
     valid_data_loader = train_data_loader.split_validation()
@@ -68,16 +72,21 @@ def main(args):
 
     revision_logger = Logger(
         os.path.join(args.log_path, 'revision_info.log'),
-        ['dataset', 'model', 'model_depth', 'batch_size', 'n_epochs', 'crop_scale', 'cropped_data_ratio', 'dataset_size'])
+        ['dataset', 'dataset_size', 'train_test_split', 'model', 'model_depth', 'resume', 'resume_path', 'batch_size',
+         'n_epochs', 'crop_scale', 'cropped_data_ratio', 'resume path'])
     revision_logger.log({
         'dataset': args.dataset,
+        'dataset_size': args.dataset_size,
+        'train_test_split': args.train_test_split,
         'model': args.model,
         'model_depth': args.model_depth,
+        'resume': args.resume,
+        'resume_path': args.resume_path,
         'batch_size': args.batch_size,
         'n_epochs': args.n_epochs,
         'crop_scale': args.crop_scale,
         'cropped_data_ratio': args.cropped_data_ratio,
-        'dataset_size': args.dataset_size
+        'resume path':args.resume_folder
     })
 
     if args.nesterov:

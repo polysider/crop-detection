@@ -42,16 +42,17 @@ class CroppedStanfordOnlineProducts(ImageFolder, CIFAR10):
     ]
     my_classes = ['0 - not cropped', '1 - cropped']
 
+    def make_dataset(self):
+
+
+        pass
+
     def __init__(self, root, train=False, transform=None, target_transform=None, crop_transform=None, download=False,
                  cropped_data_ratio=0.5, dataset_size=None, **kwargs):
 
         super().__init__(root, transform, target_transform, loader=default_loader)
 
-        # self.root = root
-        # self.transform = transform
         self.crop_transform = crop_transform
-        # self.target_transform = target_transform
-        # self.loader = default_loader
 
         if download:
             self.download()

@@ -2,6 +2,7 @@ from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
 from dataset.base_data_loader import BaseDataLoader
 from dataset.cropped_MNIST import CroppedMNIST
+from dataset.shopee_data import ShopeeData
 from dataset.cropped_stanford_online_products import CroppedStanfordOnlineProducts
 
 
@@ -112,3 +113,41 @@ class CroppedSOPLoader(BaseDataLoader):
                                                      cropped_data_ratio=args.cropped_data_ratio,
                                                      dataset_size=args.dataset_size)
         super(CroppedSOPLoader, self).__init__(self.dataset, batch_size, shuffle, split, num_workers)
+
+
+class ShopeeDataLoader(BaseDataLoader):
+    """
+    herp derp
+    """
+    sample_size = 64
+    n_channels = 3
+
+    rgb_mean = [0.485, 0.456, 0.406]
+    rgb_std = [0.229, 0.224, 0.225]
+
+    def __init__(self, args, crop_transform, spatial_transform=None, training=True):
+
+        data_path = args.data_path
+        batch_size = args.batch_size
+        shuffle = args.shuffle
+        split = args.validation_split
+        num_workers = args.num_workers
+
+        if spatial_transform != None:
+            transform = transforms.Compose([
+                spatial_transform,
+                transforms.ToTensor(),
+                transforms.Normalize(self.rgb_mean, self.rgb_std)
+            ])
+        else:
+            transform = transforms.Compose([
+                transforms.ToTensor(),
+                transforms.Normalize(self.rgb_mean, self.rgb_std)
+            ])
+        self.data_path = data_path
+        self.dataset = ShopeeData(self.data_path, train=training, train_test_split=args.train_test_split,
+                                                     unzip=True, transform=transform,
+                                                     crop_transform=crop_transform,
+                                                     cropped_data_ratio=args.cropped_data_ratio,
+                                                     dataset_size=args.dataset_size)
+        super(ShopeeDataLoader, self).__init__(self.dataset, batch_size, shuffle, split, num_workers)

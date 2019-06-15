@@ -31,7 +31,7 @@ def parse_args():
         '--dataset',
         default='SOP',
         type=str,
-        help='Used dataset (MNIST | SOP)')
+        help='Used dataset (MNIST | SOP | Shopee)')
 
     parser.add_argument(
         '--crop_anomaly',
@@ -64,6 +64,12 @@ def parse_args():
         type=int,
         help='Total amount of data used for training and validation')
 
+    parser.add_argument(
+        '--train_test_split',
+        default=0.8,
+        type=float,
+        help='Train/test data proportion')
+
 
     # Path Arguments
 
@@ -90,6 +96,12 @@ def parse_args():
         default='results/saved_models/',
         type=str,
         help='Resume directory')
+
+    parser.add_argument(
+        '--debug',
+        action='store_true',
+        default=False,
+        help='avoids creation of the result folders')
 
     parser.add_argument(
         '--result_folder',
@@ -277,18 +289,6 @@ from datetime import datetime
 
 def post_process_args(args):
 
-    if args.root_path != '':
-        args.result_path = os.path.join(args.root_path, args.result_folder)
-    else:
-        args.result_path = os.path.join(os.path.curdir, args.result_folder)
-
-    if args.unique_result_folder:
-        subdir = datetime.strftime(datetime.now(), '%Y-%m-%d_%H-%M-%S')
-        result_dir = os.path.join(args.result_path, subdir)
-        if not os.path.isdir(result_dir):  # Create the log directory if it doesn't exist
-            os.makedirs(result_dir)
-        args.result_path = result_dir
-
     if args.data_folder and args.dataset:
         args.data_path = os.path.join(args.root_path, args.data_folder, args.dataset)
 
@@ -297,21 +297,35 @@ def post_process_args(args):
     if args.pretrain_folder:
         args.pretrain_path = os.path.join(args.root_path, args.pretrain_folder)
 
-    args.log_path = os.path.join(args.result_path, args.log_folder)
-    if not os.path.exists(args.log_path):
-        os.mkdir(args.log_path)
-
-    args.plot_path = os.path.join(args.result_path, 'plots')
-    if not os.path.exists(args.plot_path):
-        os.mkdir(args.plot_path)
-
-    args.save_model_path = os.path.join(args.result_path, args.save_model_folder)
-    if not os.path.exists(args.save_model_path):
-        os.mkdir(args.save_model_path)
-
     if args.model == 'resnet':
         args.arch = '{}-{}'.format(args.model, args.model_depth)
     else:
         args.arch = '{}'.format(args.model)
+
+    if not args.debug:
+
+        if args.root_path != '':
+            args.result_path = os.path.join(args.root_path, args.result_folder)
+        else:
+            args.result_path = os.path.join(os.path.curdir, args.result_folder)
+
+        if args.unique_result_folder:
+            subdir = datetime.strftime(datetime.now(), '%Y-%m-%d_%H-%M-%S')
+            result_dir = os.path.join(args.result_path, subdir)
+            if not os.path.isdir(result_dir):  # Create the log directory if it doesn't exist
+                os.makedirs(result_dir)
+            args.result_path = result_dir
+
+        args.log_path = os.path.join(args.result_path, args.log_folder)
+        if not os.path.exists(args.log_path):
+            os.mkdir(args.log_path)
+
+        args.plot_path = os.path.join(args.result_path, 'plots')
+        if not os.path.exists(args.plot_path):
+            os.mkdir(args.plot_path)
+
+        args.save_model_path = os.path.join(args.result_path, args.save_model_folder)
+        if not os.path.exists(args.save_model_path):
+            os.mkdir(args.save_model_path)
 
     return args

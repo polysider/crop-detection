@@ -51,6 +51,12 @@ def parse_args():
         type=int,
         help='Total amount of data used for testing')
 
+    parser.add_argument(
+        '--train_test_split',
+        default=0.8,
+        type=float,
+        help='Train/test data proportion')
+
 
     # Path Arguments
 
@@ -62,7 +68,7 @@ def parse_args():
 
     parser.add_argument(
         '--dataset',
-        default='SOP',
+        default='Shopee',
         type=str,
         help='Root directory path of data')
 
@@ -109,7 +115,7 @@ def parse_args():
         '--model',
         default='resnet',
         type=str,
-        help='(derpnet | alexnet | resnet')
+        help='(derpnet | alexnet | resnet)')
 
     parser.add_argument(
         '--model_depth',

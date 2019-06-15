@@ -28,6 +28,9 @@ def main(args):
             args.sample_size = 224
         else:
             args.sample_size = 28
+    elif args.dataset == 'Shopee':
+        if args.model == 'resnet':
+            args.sample_size = 224
 
     spatial_transform_test = get_test_transform(args)
     crop_transform = get_crop_transform(args)
@@ -40,6 +43,10 @@ def main(args):
         test_data_loader = data_loading.CroppedSOPLoader(args, crop_transform=crop_transform,
                                                spatial_transform=spatial_transform_test, training=False)
 
+    elif args.dataset == 'Shopee':
+        test_data_loader = data_loading.ShopeeDataLoader(args, crop_transform=crop_transform,
+                                               spatial_transform=spatial_transform_test, training=False)
+
     args.n_classes = test_data_loader.n_classes
 
     # prepare the model for testing
@@ -47,21 +54,23 @@ def main(args):
     model = model.to(device)
 
     test_logger = Logger(
-        os.path.join(args.log_path, 'test.log'),
+        os.path.join(args.log_path, 'test_{}.log'.format(args.dataset)),
         ['batch', 'loss', 'acc'])
 
     revision_logger = Logger(
-        os.path.join(args.log_path, 'test_config.log'),
-        ['dataset', 'n_classes', 'model', 'model_depth', 'test_batch_size', 'crop_scale', 'cropped_data_ratio', 'dataset_size', 'shuffle'])
+        os.path.join(args.log_path, 'test_config_{}.log'.format(args.dataset)),
+        ['dataset', 'dataset_size', 'train_test_split', 'n_classes', 'model', 'model_depth',
+         'test_batch_size', 'crop_scale', 'cropped_data_ratio', 'shuffle'])
     revision_logger.log({
         'dataset': args.dataset,
+        'dataset_size': args.dataset_size,
+        'train_test_split': args.train_test_split,
         'n_classes': args.n_classes,
         'model': args.model,
         'model_depth': args.model_depth,
         'test_batch_size': args.batch_size,
         'crop_scale': args.crop_scale,
         'cropped_data_ratio': args.cropped_data_ratio,
-        'dataset_size': args.dataset_size,
         'shuffle': args.shuffle
     })
 
