@@ -9,6 +9,7 @@ from torchvision.datasets.utils import download_url
 from torchvision.datasets.folder import default_loader
 
 from PIL import Image
+import numpy as np
 
 
 def has_file_allowed_extension(filename, extensions):
@@ -104,39 +105,47 @@ class ShopeeData(ImageFolder, CIFAR10):
 
     def _prepare_split(self, train, split, dataset_size, cropped_data_ratio):
 
-        negative_samples_idxs = [i for i, sample in enumerate(self.samples) if sample[1] == 0]
-        positive_samples_idxs = [i for i, sample in enumerate(self.samples) if sample[1] == 1]
-
+        # optional parameter that limits the total size of the dataset
         if dataset_size is not None and dataset_size < len(self.samples):
             self.samples = self.samples[:dataset_size]
 
-        # train_split_negative = negative_samples_idxs[:round(len(negative_samples_idxs)*split)]
-        # train_split_positive = positive_samples_idxs[:round(len(positive_samples_idxs)*split)]
-        #
-        # test_split_negative = negative_samples_idxs[round(len(negative_samples_idxs)*split): len(negative_samples_idxs)]
-        # test_split_positive = positive_samples_idxs[round(len(positive_samples_idxs)*split): len(positive_samples_idxs)]
+        # separating samples into sets of negative and positive ones
+        negative_idxs = [i for i, sample in enumerate(self.samples) if sample[1] == 0]
+        positive_idxs = [i for i, sample in enumerate(self.samples) if sample[1] == 1]
 
-        train_split_negative, test_split_negative = self._split_array(negative_samples_idxs, split)
-        train_split_positive, test_split_positive = self._split_array(positive_samples_idxs, split)
+        # splitting each subset into train and test sets separately
+        # so that the proportion of neg and pos samples remains the same in the train and test splits
+        train_negative_idxs, test_negative_idxs = self._split_array(negative_idxs, split)
+        train_positive_idxs, test_positive_idxs = self._split_array(positive_idxs, split)
 
-        self.cropped = [False] * len(self.samples)
-
-        for i, sample_index in enumerate(negative_samples_idxs):
-            if i < len(negative_samples_idxs) * cropped_data_ratio:
-                self.cropped[sample_index] = True
-
-        train_split = train_split_negative + train_split_positive
-        test_split = test_split_negative + test_split_positive
-
-        # split_idxs = [i for i in range(len(self.samples)) if i < len(self.samples) * split]
-        # train_samples = self.samples[train_split_positive]
+        # finalizing indices of the train and test samples
+        train_split = train_negative_idxs + train_positive_idxs
+        test_split = test_negative_idxs + test_positive_idxs
 
         if train:
             samples = [self.samples[idx] for idx in train_split]
-            to_be_cropped = [self.cropped[idx] for idx in train_split]
         else:
             samples = [self.samples[idx] for idx in test_split]
-            to_be_cropped = [self.cropped[idx] for idx in test_split]
+
+        # selecting the negative samples again after partitioning samples into the train and test splits
+        negative_idxs = [i for i, sample in enumerate(samples) if sample[1] == 0]
+        positive_idxs = [i for i, sample in enumerate(samples) if sample[1] == 1]
+        to_be_cropped = [False] * len(samples)
+
+        # this line will crop samples without replacements so that the final proportion of neg/all is equal to cropped_data_ratio
+        no_of_images_to_crop = max(0, round(- cropped_data_ratio * (len(negative_idxs) + len(positive_idxs)) + len(negative_idxs)))
+
+        # randomly permuting those indices for good measure
+        np.random.shuffle(negative_idxs)
+
+        # initializing indicator variable that will tell which image to crop during sampling from the set
+        indices = []
+        for i, sample_index in enumerate(negative_idxs):
+            if i < no_of_images_to_crop:
+                to_be_cropped[sample_index] = True
+                # print("Need to crop sample number {}".format(sample_index))
+                samples[sample_index] = (samples[sample_index][0], 1)
+                # indices.append(sample_index)
 
         return samples, to_be_cropped
 
@@ -199,10 +208,13 @@ class ShopeeData(ImageFolder, CIFAR10):
         # cropped image is getting a 1 label, and the non-cropped one is labeled as 0
         if self.crop_transform is not None:
             if self.cropped[index]:
-                target = 1
+                # print("cropping sample number {}".format(index))
+                # target = 1
                 img = self.crop_transform(img)
-            else:
-                target = 0
+            # else:
+                # this was a crucial mistake, shouldn't change target if no cropping is applied
+                # this line essentially discarded all real positive samples
+                # target = 0
 
         return img, target
 
