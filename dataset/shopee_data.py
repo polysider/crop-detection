@@ -53,7 +53,7 @@ def make_dataset(dir, class_to_idx, extensions):
     return samples
 
 
-class ShopeeData(ImageFolder, CIFAR10):
+class ShopeeData(ImageFolder):
     """
         The Shopee dataset of 5000 negative and 1000 positive samples.
         Has 0/1 labels for non-cropped/cropped samples

@@ -4,13 +4,13 @@ import torch.utils.data as data
 import torchvision
 from torchvision.datasets import ImageFolder
 from torchvision.datasets import CIFAR10
-from torchvision.datasets.utils import download_url
+from torchvision.datasets.utils import download_url, check_integrity
 from torchvision.datasets.folder import default_loader
 
 from PIL import Image
 
 
-class CroppedStanfordOnlineProducts(ImageFolder, CIFAR10):
+class CroppedStanfordOnlineProducts(ImageFolder):
     """
         A modified version of the Stanford Online Products dataset.
         Has 0/1 labels for non-cropped/cropped samples
@@ -84,6 +84,8 @@ class CroppedStanfordOnlineProducts(ImageFolder, CIFAR10):
 
         img, target = self._prepare_sample(index=index)
 
+        img = img.convert('RGB')
+
         if self.transform is not None:
             img = self.transform(img)
 
@@ -116,6 +118,15 @@ class CroppedStanfordOnlineProducts(ImageFolder, CIFAR10):
             img = Image.open(img)
 
         return img, target
+
+    def _check_integrity(self):
+        root = self.root
+        for fentry in (self.train_list + self.test_list):
+            filename, md5 = fentry[0], fentry[1]
+            fpath = os.path.join(root, self.base_folder, filename)
+            if not check_integrity(fpath, md5):
+                return False
+        return True
 
     def download(self):
         import zipfile
