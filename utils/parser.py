@@ -299,6 +299,8 @@ def post_process_args(args):
 
     if args.model == 'resnet':
         args.arch = '{}-{}'.format(args.model, args.model_depth)
+    elif args.model == 'vgg':
+        args.arch = '{}-{}'.format(args.model, args.model_depth)
     else:
         args.arch = '{}'.format(args.model)
 

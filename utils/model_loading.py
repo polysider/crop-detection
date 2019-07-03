@@ -3,16 +3,41 @@ from torch import nn
 
 import copy
 
-from models import derp_net, resnet, alexnet
+from models import derp_net, resnet, alexnet, vgg, inception
 
 def get_model(args):
 
     assert args.model in [
-        'derpnet', 'alexnet', 'resnet'
+        'derpnet', 'alexnet', 'resnet' ,'vgg', 'inception'
     ]
 
     if args.model == 'alexnet':
         model = alexnet.alexnet(pretrained=args.pretrained, n_channels=args.n_channels, num_classes=args.n_classes)
+    elif args.model == 'inception':
+        model = inception.inception_v3(pretrained=args.pretrained, progress = True, num_classes = args.n_classes)
+    elif args.model == 'vgg':
+        assert args.model_depth in [11, 13, 16, 19]
+
+        if args.model_depth == 11:
+            model = vgg.vgg11_bn(
+                pretrained=args.pretrained,
+                progress= True,
+                num_classes=args.n_classes)
+        if args.model_depth == 13:
+            model = vgg.vgg13_bn(
+                pretrained=args.pretrained,
+                progress= True,
+                num_classes=args.n_classes)
+        if args.model_depth == 16:
+            model = vgg.vgg16_bn(
+                pretrained=args.pretrained,
+                progress= True,
+                num_classes=args.n_classes)
+        if args.model_depth == 19:
+            model = vgg.vgg19_bn(
+                pretrained=args.pretrained,
+                progress= True,
+                num_classes=args.n_classes)     
 
     elif args.model == 'derpnet':
         model = derp_net.Net(n_channels=args.n_channels, num_classes=args.n_classes)

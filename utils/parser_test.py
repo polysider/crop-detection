@@ -192,7 +192,9 @@ def post_process_args(args):
     args.log_path = os.path.join(args.result_path, args.log_folder)
     if not os.path.exists(args.log_path):
         os.mkdir(args.log_path)
-
-    args.arch = '{}-{}'.format(args.model, args.model_depth)
+    if args.model == 'resnet': #changing for different models - VGG
+        args.arch = '{}-{}'.format(args.model, args.model_depth)
+    else:
+        args.arch = '{}'.format(args.model)
 
     return args
