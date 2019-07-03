@@ -31,6 +31,8 @@ def main(args):
     elif args.dataset == 'SOP' or 'Shopee':
         if args.model == 'resnet':
             args.sample_size = 224
+        elif args.model == 'vgg':
+            args.sample_size = 224
         else:
             args.sample_size = 28
 

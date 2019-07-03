@@ -13,7 +13,7 @@ from utils.moving_average import AverageMeter
 from metrics.accuracy import calculate_accuracy
 from models.losses import cross_entropy_loss
 
-from utils.visualize import Visualizer, TestVisualizer
+from utils.visualize import Visualizer, TestVisualizer, tensors_to_imgs_mnist, tensors_to_imgs
 
 def main(args):
 
@@ -26,10 +26,14 @@ def main(args):
     elif args.dataset == 'SOP':
         if args.model == 'resnet':
             args.sample_size = 224
+        elif args.model == 'vgg':
+            args.sample_size = 224
         else:
             args.sample_size = 28
     elif args.dataset == 'Shopee':
         if args.model == 'resnet':
+            args.sample_size = 224
+        elif args.model == 'vgg':
             args.sample_size = 224
 
     spatial_transform_test = get_test_transform(args)
