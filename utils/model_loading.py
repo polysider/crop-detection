@@ -74,7 +74,7 @@ def get_model(args):
                 pretrained=args.pretrained,
                 num_classes=args.n_classes)
 
-    if args.pretrained and args.pretrain_path and not args.model == 'alexnet':
+    if args.pretrained and args.pretrain_path and not args.model == 'alexnet' and not args.model == 'vgg':
 
         print('loading pretrained model {}'.format(args.pretrain_path))
         pretrain = torch.load(args.pretrain_path)
