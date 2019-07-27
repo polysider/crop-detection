@@ -50,8 +50,8 @@ class RandomCrop(object): #original random crop
         w, h = img.size
         th, tw = self.size
         if (w<=tw) or (h<=th): #Case w x h smaller than 224x224:
-            x1 = int(random.randrange(0, w-tw/2)) #random on the half range of resolution
-            y1 = int(random.randrange(0, h-th/2)) #random on the half range of resolution
+            x1 = int(random.randrange(0, int(w-tw/3))) #random on the half range of resolution
+            y1 = int(random.randrange(0, int(h-th/3))) #random on the half range of resolution
             #print(x1, y1) #debugging purpose
             img = img.crop((x1, y1, x1+tw/2, y1+th/2)) #crop the pic
             return img.resize((th, tw), self.interpolation)

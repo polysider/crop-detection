@@ -34,7 +34,7 @@ def get_model(args):
                 progress= True,
                 num_classes=args.n_classes)
         if args.model_depth == 19:
-            model = vgg.vgg19_bn(
+            model = vgg.vgg19(
                 pretrained=args.pretrained,
                 progress= True,
                 num_classes=args.n_classes)     

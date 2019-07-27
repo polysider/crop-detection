@@ -122,7 +122,7 @@ if __name__ == '__main__':
     args = parse_args()
 
     os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-    os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu_id #changing
+    os.environ["CUDA_VISIBLE_DEVICES"] =  args.gpu_id #changing
     print("Model: {}".format(args.model))
 
     use_cuda = not args.no_cuda and torch.cuda.is_available()
