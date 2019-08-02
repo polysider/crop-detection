@@ -52,6 +52,7 @@ def main(args):
     # prepare the model for testing
     model, parameters = get_model(args)
     model = model.to(device)
+    model.eval()
 
     test_logger = Logger(
         os.path.join(args.log_path, 'test_{}.log'.format(args.dataset)),
