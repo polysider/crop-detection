@@ -48,6 +48,9 @@ def main(args):
                                                spatial_transform=spatial_transform_test, training=False)
 
     args.n_classes = test_data_loader.n_classes
+    data_ratio = sum([1 for sample in test_data_loader.dataset.samples if sample[1] == 0]) / \
+                 sum([1 for sample in test_data_loader.dataset.samples if sample[1] == 1])
+    print("normal data/cropped data ratio: {}".format(data_ratio))
 
     # prepare the model for testing
     model, parameters = get_model(args)
