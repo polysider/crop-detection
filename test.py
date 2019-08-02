@@ -77,7 +77,7 @@ def main(args):
 
     # load the trained model weights
     print('loading checkpoint {}'.format(args.model_path))
-    checkpoint = torch.load(args.model_path)
+    checkpoint = torch.load(args.model_path, map_location=device)
     assert args.arch == checkpoint['arch']
     model.load_state_dict(checkpoint['state_dict'])
 
@@ -142,5 +142,6 @@ if __name__ == '__main__':
     print("Random seed: {}".format(args.seed))
 
     device = torch.device("cuda" if use_cuda else "cpu")
-    print('Device: {}'.format(torch.cuda.get_device_name(torch.cuda.current_device())))
+    if not args.no_cuda and torch.cuda.is_available():
+        print('Device: {}'.format(torch.cuda.get_device_name(torch.cuda.current_device())))
     main(args)
