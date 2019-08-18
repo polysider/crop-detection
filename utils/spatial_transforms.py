@@ -35,6 +35,31 @@ class Compose(object):
         for t in self.transforms:
             t.randomize_parameters()
 
+class RandomCropRandomScale(object): #random crop w random scale
+    def __init__(self, size, interpolation = Image.BILINEAR):
+        if isinstance(size, numbers.Number):
+            self.size = (int(size), int(size))
+            self.interpolation = interpolation
+        else:
+            self.size = size
+            self.interpolation = interpolation
+    def __call__(self, img):
+        iWidth, iHeight= img.size #input w and h
+        tWidth, tHeight = self.size   #train w and h
+
+        rWidthScale = np.random.uniform(0.3, 0.51) #random ratio for width and height
+        rHeightScale = np.random.uniform(0.3, 0.51)
+
+        cWidth = int(iWidth * rWidthScale) #cropped area size 
+        cHeight = int(iHeight * rHeightScale)
+
+        x1 = int(random.randrange(0, iWidth - cWidth)) #random anchor point
+        y1 = int(random.randrange(0, iHeight - cHeight))
+        #print(x1, y1) #debugging
+        img = img.crop((x1, y1, x1 + cWidth, y1 + cHeight)) #cropping
+        return img.resize((iWidth, iHeight), self.interpolation)
+
+
 class RandomCrop(object): #original random crop
     #crop at random area of the picture.
 
@@ -49,11 +74,12 @@ class RandomCrop(object): #original random crop
     def __call__(self, img):
         w, h = img.size
         th, tw = self.size
+
         if (w<=tw) or (h<=th): #Case w x h smaller than 224x224:
-            x1 = int(random.randrange(0, int(w-tw/3))) #random on the half range of resolution
-            y1 = int(random.randrange(0, int(h-th/3))) #random on the half range of resolution
+            x1 = int(random.randrange(0, int(w-tw/4))) #random on the half range of resolution
+            y1 = int(random.randrange(0, int(h-th/4))) #random on the half range of resolution
             #print(x1, y1) #debugging purpose
-            img = img.crop((x1, y1, x1+tw/2, y1+th/2)) #crop the pic
+            img = img.crop((x1, y1, x1+tw/4, y1+th/4)) #crop the pic
             return img.resize((th, tw), self.interpolation)
         else:
             x1 = int(random.randrange(0, w-tw))

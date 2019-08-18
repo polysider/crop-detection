@@ -1,4 +1,4 @@
-from utils.spatial_transforms import CenterCrop, MultiScaleCornerCrop, Scale, Compose, RandomCrop
+from utils.spatial_transforms import CenterCrop, MultiScaleCornerCrop, Scale, Compose, RandomCrop, RandomCropRandomScale
 
 
 def get_train_transform(args):
@@ -12,7 +12,8 @@ def get_train_transform(args):
 def get_crop_transform(args):
 
     # spatial_transform = None
-    spatial_transform = RandomCrop(args.sample_size)
+    #spatial_transform = RandomCrop(args.sample_size)
+    spatial_transform = RandomCropRandomScale(args.sample_size)
     #spatial_transform = MultiScaleCornerCrop([args.crop_scale], args.sample_size, crop_positions='c')
     #spatial_transform = MultiScaleCornerCrop([args.crop_scale], args.sample_size, crop_positions='tl')
     #spatial_transform = MultiScaleCornerCrop([args.crop_scale], args.sample_size, crop_positions='tr')
