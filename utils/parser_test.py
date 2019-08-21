@@ -160,7 +160,7 @@ def parse_args():
 
     parser.add_argument(
         '--plot_interval',
-        default=10,
+        default=1,
         type=int,
         help='how many batches to wait before plotting test images')
 
@@ -193,6 +193,9 @@ def post_process_args(args):
     if not os.path.exists(args.log_path):
         os.mkdir(args.log_path)
 
-    args.arch = '{}-{}'.format(args.model, args.model_depth)
+    if args.model == 'resnet':
+        args.arch = '{}-{}'.format(args.model, args.model_depth)
+    else:
+        args.arch = '{}'.format(args.model)
 
     return args

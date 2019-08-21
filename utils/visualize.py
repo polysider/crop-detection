@@ -96,7 +96,7 @@ class Visualizer:
 
 class TestVisualizer(Visualizer):
 
-    def __init__(self, classes, mean, std, args):
+    def __init__(self, classes, mean, std, n, args):
         """
                 inputs:
                 imgs: list of Torch cpu tensors of NumImgs x n_channels x W x H
@@ -115,14 +115,15 @@ class TestVisualizer(Visualizer):
         fig_size = [10, 10]
         plt.rcParams["figure.figsize"] = fig_size
 
-        self.fig, self.axes = plt.subplots(5, 5)
+        self.n_imgs = n if n in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] else 5
+        self.fig, self.axes = plt.subplots(self.n_imgs, self.n_imgs)
         self.fig.subplots_adjust(hspace=0.2, wspace=0.2)
 
 
-    def showgrid(self, tensors, targets, predictions=None):
+    def make_grid(self, tensors, targets, predictions=None):
 
         npimgs = self.tensors_to_imgs(tensors, self.mean, self.std)
-        targets = targets.cpu().numpy()
+        targets = [target.cpu().numpy() for target in targets]
 
         for i, ax in enumerate(self.axes.flat):
             ax.set_xticks([])
@@ -130,7 +131,7 @@ class TestVisualizer(Visualizer):
 
         for i, npimage in enumerate(npimgs):
 
-            if i < 25:
+            if i < self.n_imgs**2:
                 # Plot image.
                 self.axes.flat[i].imshow(npimage)
 
@@ -144,11 +145,18 @@ class TestVisualizer(Visualizer):
                 self.axes.flat[i].set_xticks([])
                 self.axes.flat[i].set_yticks([])
 
+    def show(self, block=False):
         # Draw the plot
-        plt.show(block=False)
-        plt.draw()
-        plt.pause(0.5)
-
+        if block:
+            plt.ion()
+            plt.draw()
+            plt.show(block=block)
+            plt.ioff()
+            plt.show()
+        else:
+            plt.show(block=block)
+            plt.draw()
+            plt.pause(0.5)
 
 # rubbish below
 

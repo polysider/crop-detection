@@ -89,10 +89,18 @@ def main(args):
     accuracies = AverageMeter()
     losses = AverageMeter()
 
-    visualizer = TestVisualizer(test_data_loader.classes, test_data_loader.rgb_mean, test_data_loader.rgb_std,
-                            args)
+    visualizer = TestVisualizer(test_data_loader.classes, test_data_loader.rgb_mean, test_data_loader.rgb_std, 5,
+                              args)
+
+    show_misclassified = False
+    block = False
 
     with torch.no_grad():
+
+        misclassified_images_full = []
+        misclassified_true_labels_full = []
+        misclassified_predictions_full = []
+
         for i, (inputs, targets) in enumerate(test_data_loader):
             inputs, targets = inputs.to(device), targets.to(device)
             outputs = model(inputs)
@@ -102,10 +110,28 @@ def main(args):
             acc = calculate_accuracy(outputs, targets)
             accuracies.update(acc, inputs.size(0))
 
+            _, predictions = outputs.topk(1, 1, True)
+            fails = predictions.squeeze() != targets
+            predictions = predictions.squeeze().cpu().numpy()
+            print("Number of misclassifications: {}/{}".format(fails.sum(), len(inputs)))
+
+            if show_misclassified:
+
+                misclassified_idxs = [i for i, x in enumerate(fails) if x]
+                misclassified_images = [inputs[idx] for idx in misclassified_idxs]
+                misclassified_true_labels = [targets[idx] for idx in misclassified_idxs]
+                misclassified_predictions = [predictions[idx] for idx in misclassified_idxs]
+
+                misclassified_images_full.extend(misclassified_images)
+                misclassified_true_labels_full.extend(misclassified_true_labels)
+                misclassified_predictions_full.extend(misclassified_predictions)
+
             if args.show_test_images and i % args.plot_interval == 0:
-                _, predictions = outputs.topk(1, 1, True)
-                predictions = predictions.squeeze().cpu().numpy()
-                visualizer.showgrid(inputs, targets, predictions)
+                # visualizer = TestVisualizer(test_data_loader.classes, test_data_loader.rgb_mean,
+                #                             test_data_loader.rgb_std, 5, False,
+                #                             args)
+                visualizer.make_grid(inputs, targets, predictions)
+                visualizer.show(block)
 
             test_logger.log({
                 'batch': i+1,
@@ -120,6 +146,27 @@ def main(args):
                 len(test_data_loader),
                 loss=losses,
                 acc=accuracies))
+
+
+        if show_misclassified:
+            keep_going = True
+            n_images = 5
+            start = 0
+            while keep_going:
+                error_visualizer = TestVisualizer(test_data_loader.classes, test_data_loader.rgb_mean, test_data_loader.rgb_std,
+                                            n_images, args)
+                if n_images**2 < len(misclassified_images_full[start:]):
+                    images, labels, predictions = misclassified_images_full[start:start+n_images**2], \
+                                                  misclassified_true_labels_full[start:start+n_images**2], \
+                                                  misclassified_predictions_full[start:start+n_images**2]
+                else:
+                    images, labels, predictions = misclassified_images_full[start:], \
+                                                  misclassified_true_labels_full[start:], \
+                                                  misclassified_predictions_full[start:]
+                    keep_going = False
+                error_visualizer.make_grid(images, labels, predictions)
+                error_visualizer.show(True)
+                start += n_images**2
 
     print('Test log written to {}'.format(test_logger.log_file))
 
