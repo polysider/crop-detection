@@ -74,7 +74,7 @@ def get_model(args):
                 pretrained=args.pretrained,
                 num_classes=args.n_classes)
 
-    if args.pretrained and args.pretrain_path and not args.model == 'alexnet' and not args.model == 'vgg':
+    if args.pretrained and args.pretrain_path and not args.model == 'alexnet' and not args.model == 'vgg' and not args.model == 'resnet':
 
         print('loading pretrained model {}'.format(args.pretrain_path))
         pretrain = torch.load(args.pretrain_path)
@@ -96,14 +96,14 @@ def get_model(args):
 
         num_features = model.fc.in_features
         if args.model == 'densenet':
-            model.classifier = nn.Linear(num_features, args.n_finetune_classes)
+            model.classifier = nn.Linear(num_features, args.n_classes)
         else:
             #model.fc = nn.Sequential(nn.Linear(num_features, 1028), nn.ReLU(), nn.Dropout(0.5), nn.Linear(1028, args.n_finetune_classes))
-            model.fc = nn.Linear(num_features, args.n_finetune_classes)
+            model.fc = nn.Linear(num_features, args.n_classes)
 
-        #parameters = get_fine_tuning_parameters(model, args.ft_begin_index)
-        #parameters = model.parameters()  # fine-tunining EVERYTHIIIIIANG
-        parameters = model.fc.parameters()  # fine-tunining ONLY FC layer
+        # parameters = get_fine_tuning_parameters(model, args.ft_begin_index)
+        parameters = model.parameters()  # fine-tunining EVERYTHIIIIIANG
+        # parameters = model.fc.parameters()  # fine-tunining ONLY FC layer
         return model, parameters
 
     return model, model.parameters()

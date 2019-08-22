@@ -149,14 +149,6 @@ def parse_args():
         help=
         'Number of classes of the pretrained model'
     )
-    parser.add_argument(
-        '--n_finetune_classes',
-        default=10,
-        type=int,
-        help=
-        'Number of classes for fine-tuning. n_classes is set to the number when pretraining.'
-    )
-
 
     # Training Arguments
 
