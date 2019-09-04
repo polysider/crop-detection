@@ -17,7 +17,7 @@ _InceptionOutputs = namedtuple('InceptionOutputs', ['logits', 'aux_logits'])
 
 
 def inception_v3(pretrained=False, progress=True, **kwargs):
-    """Inception v3 model architecture from
+    r"""Inception v3 model architecture from
     `"Rethinking the Inception Architecture for Computer Vision" <http://arxiv.org/abs/1512.00567>`_.
     .. note::
         **Important**: In contrast to the other models the inception_v3 expects tensors with a size of
@@ -61,7 +61,6 @@ class Inception3(nn.Module):
         self.Conv2d_2b_3x3 = BasicConv2d(32, 64, kernel_size=3, padding=1)
         self.Conv2d_3b_1x1 = BasicConv2d(64, 80, kernel_size=1)
         self.Conv2d_4a_3x3 = BasicConv2d(80, 192, kernel_size=3)
-        self.Conv2d_4b_1x1 = BasicConv2d(80, 192, kernel_size=1) #experimental adding 1 convolution layer for 1x1 kernel
         self.Mixed_5b = InceptionA(192, pool_features=32)
         self.Mixed_5c = InceptionA(256, pool_features=64)
         self.Mixed_5d = InceptionA(288, pool_features=64)
@@ -109,8 +108,7 @@ class Inception3(nn.Module):
         # N x 80 x 73 x 73
         x = self.Conv2d_4a_3x3(x)
         # N x 192 x 71 x 71
-        x = self.Conv2d_4b_1x1(x) #experimental adding 1x1 conv layer 
-        x = F.max_pool2d(x, kernel_size=1, stride=2) #original kernel size = 3, modifying for 1x1 kernel size
+        x = F.max_pool2d(x, kernel_size=3, stride=2)
         # N x 192 x 35 x 35
         x = self.Mixed_5b(x)
         # N x 256 x 35 x 35
@@ -142,7 +140,7 @@ class Inception3(nn.Module):
         # N x 2048 x 1 x 1
         x = F.dropout(x, training=self.training)
         # N x 2048 x 1 x 1
-        x = x.view(x.size(0), -1)
+        x = torch.flatten(x, 1)
         # N x 2048
         x = self.fc(x)
         # N x 1000 (num_classes)
@@ -334,7 +332,7 @@ class InceptionAux(nn.Module):
         # Adaptive average pooling
         x = F.adaptive_avg_pool2d(x, (1, 1))
         # N x 768 x 1 x 1
-        x = x.view(x.size(0), -1)
+        x = torch.flatten(x, 1)
         # N x 768
         x = self.fc(x)
         # N x 1000
