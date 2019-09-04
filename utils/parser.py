@@ -47,6 +47,12 @@ def parse_args():
         help='Number of channels in the input images (1 for grayscale)')
 
     parser.add_argument(
+        '--crop_position',
+        default='random',
+        type=str,
+        help='Position of the crop window used to synthesize samples (random | center)')
+
+    parser.add_argument(
         '--crop_scale',
         default=0.5,
         type=float,

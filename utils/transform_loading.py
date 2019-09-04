@@ -13,9 +13,12 @@ def get_crop_transform(args):
 
     # spatial_transform = None
     #spatial_transform = RandomCrop(args.sample_size)
-    spatial_transform = RandomCropRandomScale(args.sample_size)
-    #spatial_transform = MultiScaleCornerCrop([args.crop_scale], args.sample_size, crop_positions='c')
-    #spatial_transform = MultiScaleCornerCrop([args.crop_scale], args.sample_size, crop_positions='tl')
+    if args.crop_position == 'center':
+        spatial_transform = MultiScaleCornerCrop([args.crop_scale], args.sample_size, crop_positions='c')
+    else:
+        spatial_transform = RandomCropRandomScale(args.sample_size)
+    # spatial_transform = MultiScaleCornerCrop([args.crop_scale], args.sample_size, crop_positions='c')
+    # spatial_transform = MultiScaleCornerCrop([args.crop_scale], args.sample_size, crop_positions='tl')
     #spatial_transform = MultiScaleCornerCrop([args.crop_scale], args.sample_size, crop_positions='tr')
     #spatial_transform = MultiScaleCornerCrop([args.crop_scale], args.sample_size, crop_positions='bl')
     #spatial_transform = MultiScaleCornerCrop([args.crop_scale], args.sample_size, crop_positions='br')
