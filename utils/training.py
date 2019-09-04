@@ -5,7 +5,7 @@ import numpy as np
 
 from utils.moving_average import AverageMeter
 from metrics.accuracy import calculate_accuracy
-from utils.visualize import Visualizer
+from utils.visualize import Visualizer, TestVisualizer
 
 
 class Trainer:
@@ -32,6 +32,8 @@ class Trainer:
         self.epochs = args.n_epochs
         self.visualizer = Visualizer(self.data_loader.classes, self.data_loader.rgb_mean, self.data_loader.rgb_std,
                                      self.args)
+        # self.visualizer_test = TestVisualizer(self.data_loader.classes, self.data_loader.rgb_mean,
+        #                                       self.data_loader.rgb_std, 6, self.args)
 
     def train(self):
         """
@@ -72,9 +74,6 @@ class Trainer:
 
             inputs, targets = inputs.to(self.device), targets.to(self.device)
 
-            if self.args.show_training_images and i % self.args.plot_interval == 0:
-                self.visualizer.showgrid(inputs, targets, (epoch - 1) * len(self.data_loader) + (i + 1))
-
             self.optimizer.zero_grad()
             data_time.update(time.time() - end_time)
             outputs = self.model(inputs)
@@ -82,6 +81,15 @@ class Trainer:
             loss = self.criterion(outputs, targets)
             loss.backward()
             self.optimizer.step()
+
+            with torch.no_grad():
+                _, predictions = outputs.topk(1, 1, True)
+
+                if self.args.show_training_images and i % self.args.plot_interval == 0:
+                    batch_number = (epoch - 1) * len(self.data_loader) + i
+                    self.visualizer.showgrid(inputs, targets, batch_number)
+                    # self.visualizer_test.make_grid(inputs, targets, predictions)
+                    # self.visualizer_test.show()
 
             with torch.no_grad():
 

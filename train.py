@@ -31,12 +31,12 @@ def main(args):
     elif args.dataset == 'SOP' or 'Shopee':
         if args.model == 'resnet':
             args.sample_size = 224
-        elif args.model == 'vgg':
+        elif args.model == 'vgg' or args.model == 'vgg_attn':
             args.sample_size = 224
         elif args.model == 'inception':
             args.sample_size = 299
         else:
-            args.sample_size = 28
+            args.sample_size = 224
 
     spatial_transform_train = get_train_transform(args)
     crop_transform = get_crop_transform(args)
@@ -55,7 +55,6 @@ def main(args):
 
     valid_data_loader = train_data_loader.split_validation()
 
-    args.sample_size = train_data_loader.sample_size
     args.n_channels = train_data_loader.n_channels
     args.n_classes = train_data_loader.n_classes
 
@@ -77,7 +76,7 @@ def main(args):
     revision_logger = Logger(
         os.path.join(args.log_path, 'revision_info.log'),
         ['dataset', 'dataset_size', 'train_test_split', 'model', 'model_depth', 'resume', 'resume_path', 'batch_size',
-         'n_epochs', 'crop_scale', 'cropped_data_ratio', 'resume path'])
+         'n_epochs', 'sample_size', 'crop_scale', 'crop_transform', 'cropped_data_ratio'])
     revision_logger.log({
         'dataset': args.dataset,
         'dataset_size': args.dataset_size,
@@ -88,9 +87,10 @@ def main(args):
         'resume_path': args.resume_path,
         'batch_size': args.batch_size,
         'n_epochs': args.n_epochs,
+        'sample_size': args.sample_size,
         'crop_scale': args.crop_scale,
-        'cropped_data_ratio': args.cropped_data_ratio,
-        'resume path':args.resume_folder
+        'crop_transform': crop_transform.__class__.__name__,
+        'cropped_data_ratio': args.cropped_data_ratio
     })
 
     if args.nesterov:
@@ -122,7 +122,7 @@ if __name__ == '__main__':
     args = parse_args()
 
     os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-    os.environ["CUDA_VISIBLE_DEVICES"] =  args.gpu_id #changing
+    os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu_id
     print("Model: {}".format(args.model))
 
     use_cuda = not args.no_cuda and torch.cuda.is_available()

@@ -23,17 +23,14 @@ def main(args):
     # data for testing
     if args.dataset == 'MNIST':
         args.sample_size = 28
-    elif args.dataset == 'SOP':
+    elif args.dataset == 'SOP' or 'Shopee':
         if args.model == 'resnet':
             args.sample_size = 224
-        elif args.model == 'vgg':
+        elif args.model == 'vgg' or args.model == 'vgg_attn':
             args.sample_size = 224
+        elif args.model == 'inception':
+            args.sample_size = 299
         else:
-            args.sample_size = 28
-    elif args.dataset == 'Shopee':
-        if args.model == 'resnet':
-            args.sample_size = 224
-        elif args.model == 'vgg':
             args.sample_size = 224
 
     spatial_transform_test = get_test_transform(args)
