@@ -1,6 +1,8 @@
 import torch.nn as nn
 import math
 import torch.utils.model_zoo as model_zoo
+import torch
+from .utils import load_state_dict_from_url
 
 
 __all__ = ['ResNet', 'resnet18', 'resnet34', 'resnet50', 'resnet101',
@@ -159,7 +161,15 @@ def resnet18(pretrained=True, **kwargs):
     """
     model = ResNet(BasicBlock, [2, 2, 2, 2], **kwargs)
     if pretrained:
-        model.load_state_dict(model_zoo.load_url(model_urls['resnet18']))
+        pretrain_dict = load_state_dict_from_url(model_urls['resnet18'])
+        model_dict = model.state_dict()
+        # 1. filter out unnecessary keys
+        pretrained_dict = {k: v for k, v in pretrain_dict.items() if k in model_dict}
+        # pretrained_dict = {k[7:]: v for k, v in pretrain_dict.items() if k[7:9] != 'fc'}
+        # 2. overwrite entries in the existing state dict
+        model_dict.update(pretrained_dict)
+        # 3. load the new state dict
+        model.load_state_dict(pretrained_dict)
     return model
 
 
