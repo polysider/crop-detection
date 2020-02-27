@@ -13,7 +13,7 @@ from torch.utils.data import DataLoader
 
 from torchvision import transforms, datasets
 
-from models import resnet
+from models import *
 from utils.model_loading import get_model
 
 
@@ -66,11 +66,32 @@ def main():
                                   batch_size=args['batch_size'],
                                   shuffle=False,
                                   num_workers=args['num_workers'])
-    print('Loading model')
-    model = resnet.resnet18(pretrained=False, num_classes=2)
-    model = model.to(device)
+
     print('Loading checkpoint')
     checkpoint = torch.load(args['model_path'], map_location=device)
+    arch = checkpoint['arch']
+
+    print('Loading model {}'.format(arch))
+    # model = resnet.resnet18(pretrained=False, num_classes=2)
+    model_args = {'pretrained': False, 'n_classes': 2}
+    model_name = arch[0:arch.rfind('-')] if arch.rfind('-') != -1 else arch
+    print(model_name)
+    model_depth = arch[arch.rfind('-')+1:] if arch.rfind('-') != -1 else '19' # VGG arch didn't have the depth in it for some reason
+    model_depth = int(model_depth)
+
+    # how to dynamically pick the module and the function on the fly
+    # https://stackoverflow.com/questions/3061/calling-a-function-of-a-module-by-using-its-name-a-string
+
+    # module = __import__("models." + model_name + '.' + arch)
+    # model = module(*model_args)
+
+    # look at the https://stackoverflow.com/questions/8575895/how-to-create-objects-on-the-fly-in-python
+    # on how to create an object on the fly
+    a = type('testclass', (object,),
+                   {'model': model_name, 'model_depth': model_depth, 'pretrained': False, 'n_classes': 2})()
+    model, _ = get_model(a)
+    model = model.to(device)
+
     model.load_state_dict(checkpoint['state_dict'])
     print('run network')
     pos_scores = []
